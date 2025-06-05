@@ -2,61 +2,271 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" href="/css/main.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matthew's Study Adventures</title>
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    .study-form {margin-bottom: 1em;}
-    .study-form textarea {width: 100%; height: 4em; margin-top: 0.5em;}
-    #study-list li {margin-bottom: 0.5em; list-style: none; background: var(--card-bg-color); padding: 0.5em; border-radius: 4px;}
-    #study-list button {margin-left: 1em;}
+    :root {
+      --mint: #b7ffc8;
+      --lavender: #e6d6ff;
+      --peach: #ffe0c6;
+      --paper: #fafafa;
+      --ink: #333;
+      --card: #ffffffaa;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      --paper: #222;
+      --ink: #f5f5f5;
+      --card: #444a;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    h1,h2,h3 {
+      font-family: 'Permanent Marker', cursive;
+      margin: 0 0 0.5em;
+    }
+    header {
+      background: linear-gradient(135deg,var(--mint),var(--lavender));
+      text-align: center;
+      padding: 4em 1em;
+      position: relative;
+    }
+    header h1 {
+      font-size: 2.5em;
+    }
+    header button {
+      background: var(--peach);
+      border: none;
+      padding: 0.8em 1.4em;
+      border-radius: 30px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    section {
+      padding: 3em 1em;
+    }
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 1em;
+      scroll-snap-type: x mandatory;
+    }
+    .carousel-card {
+      min-width: 200px;
+      background: var(--card);
+      border-radius: 20px;
+      padding: 1em;
+      box-shadow: 0 2px 6px #0003;
+      scroll-snap-align: start;
+      perspective: 1000px;
+    }
+    .carousel-card:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      top:0; left:0; right:0; bottom:0;
+      display:flex; align-items:center; justify-content:center;
+      border-radius:20px;
+    }
+    .card-back { transform: rotateY(180deg); background: var(--mint); }
+    .hack {
+      background: var(--lavender);
+      border-radius: 20px;
+      padding: 2em;
+    }
+    .hack li { list-style:none; margin:0.5em 0; }
+    .resources {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1em;
+    }
+    .resources a {
+      display:block;
+      background: var(--card);
+      padding:1em;
+      text-align:center;
+      border-radius:20px;
+      box-shadow:0 2px 4px #0003;
+      text-decoration:none; color:inherit;
+    }
+    .study-form input, .study-form textarea {
+      width:100%;
+      border-radius:10px;
+      border:1px solid #ccc;
+      padding:0.5em;
+      margin-top:0.5em;
+    }
+    .study-form button {
+      margin-top:0.5em;
+      border:none;
+      background:var(--mint);
+      padding:0.5em 1em;
+      border-radius:20px;
+      cursor:pointer;
+    }
+    #study-list li {
+      background:var(--card);
+      margin-bottom:0.5em;
+      padding:0.5em;
+      border-radius:10px;
+      list-style:none;
+    }
+    footer {
+      text-align:center;
+      padding:2em 1em;
+      background:var(--mint);
+    }
+    .dark-toggle {
+      position:fixed;
+      right:10px;
+      bottom:10px;
+      padding:0.5em 1em;
+      border:none;
+      border-radius:20px;
+      background:var(--peach);
+      cursor:pointer;
+    }
+    /* simple pomodoro */
+    #timer {
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      border:5px solid var(--lavender);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:auto;
+      font-size:1.5em;
+    }
   </style>
-  <title>Study Log</title>
 </head>
 <body>
-  <h1>Study Log</h1>
-  <div class="study-form">
-    <input type="date" id="study-date">
-    <textarea id="study-text" placeholder="What did you study today?"></textarea>
-    <button id="add-study">Add Entry</button>
+  <div id="loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--paper);z-index:9999;">
+    <img src="/images/logo.svg" alt="loading" style="width:50px;animation:spin 1s linear infinite;">
   </div>
-  <ul id="study-list"></ul>
-
+  <script>window.addEventListener('load',()=>document.getElementById('loader').style.display='none');</script>
+  <button class="dark-toggle" onclick="document.body.classList.toggle('dark')">🌙</button>
+  <header>
+    <h1>Matthew's Study Adventures ✏️</h1>
+    <p>Notes, hacks &amp; late-night coffee revelations.</p>
+    <button onclick="document.getElementById('posts').scrollIntoView({behavior:'smooth'})">Dive into the notes!</button>
+  </header>
+  <section id="posts">
+    <h2>Latest Posts 📚</h2>
+    <div class="carousel">
+      <div class="carousel-card"><div class="card-inner"><div class="card-front">Post 1</div><div class="card-back">Coming soon!</div></div></div>
+      <div class="carousel-card"><div class="card-inner"><div class="card-front">Post 2</div><div class="card-back">Coming soon!</div></div></div>
+      <div class="carousel-card"><div class="card-inner"><div class="card-front">Post 3</div><div class="card-back">Coming soon!</div></div></div>
+    </div>
+  </section>
+  <section id="hack" class="hack">
+    <h2>Study Hack of the Week 💡</h2>
+    <ul>
+      <li><input type="checkbox"> Break topics into bite-sized goals</li>
+      <li><input type="checkbox"> Review with flashcards before bed</li>
+      <li><input type="checkbox"> Reward yourself with music breaks</li>
+    </ul>
+  </section>
+  <section id="focus">
+    <h2>Playlist &amp; Pomodoro 🚀</h2>
+    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3yvAYDslnv8?utm_source=generator" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    <div id="timer">25:00</div>
+    <button onclick="startTimer()">Start</button>
+  </section>
+  <section id="library">
+    <h2>Resource Library 🎧</h2>
+    <div class="resources">
+      <a href="#" download>Cheat Sheet 1</a>
+      <a href="#" download>Lecture Slides</a>
+      <a href="#" download>Quick Ref Card</a>
+    </div>
+  </section>
+  <section id="log">
+    <h2>Daily Study Log</h2>
+    <div class="study-form">
+      <input type="date" id="study-date">
+      <textarea id="study-text" placeholder="What did you study today?"></textarea>
+      <button id="add-study">Add Entry</button>
+    </div>
+    <ul id="study-list"></ul>
+  </section>
+  <section id="about">
+    <h2>About &amp; Contact</h2>
+    <img src="/images/avatar.gif" alt="Matthew" style="width:150px;border-radius:10px;box-shadow:0 2px 6px #0003;">
+    <p>Hey! I'm Matthew. Find me on <a href="#">Instagram</a>, <a href="#">YouTube</a>, or <a href="#">Discord</a>.</p>
+    <form onsubmit="confetti(); return false;">
+      <input type="text" placeholder="Your email" required style="padding:0.5em;border-radius:10px;border:1px solid #ccc;">
+      <button type="submit" style="background:var(--peach);border:none;padding:0.5em 1em;border-radius:20px;cursor:pointer;">Send</button>
+    </form>
+  </section>
+  <footer>
+    &copy; 2024 Matthew
+  </footer>
 <script>
-(function() {
-  const dateInput = document.getElementById('study-date');
-  const textInput = document.getElementById('study-text');
-  const list = document.getElementById('study-list');
-  const storageKey = 'studyEntries';
-  function load() {
-    const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    list.innerHTML = '';
-    data.forEach((item, idx) => {
-      const li = document.createElement('li');
-      li.textContent = `${item.date}: ${item.text}`;
-      const del = document.createElement('button');
-      del.textContent = 'Delete';
-      del.onclick = () => {
-        data.splice(idx, 1);
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        load();
-      };
-      li.appendChild(del);
-      list.appendChild(li);
-    });
-  }
-  document.getElementById('add-study').onclick = () => {
-    const date = dateInput.value || new Date().toISOString().slice(0,10);
-    const text = textInput.value.trim();
-    if (!text) return;
-    const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    data.push({date, text});
-    localStorage.setItem(storageKey, JSON.stringify(data));
-    textInput.value = '';
-    load();
-  };
-  dateInput.value = new Date().toISOString().slice(0,10);
-  load();
-})();
+const dateInput = document.getElementById('study-date');
+const textInput = document.getElementById('study-text');
+const list = document.getElementById('study-list');
+const storageKey = 'studyEntries';
+function load(){
+  const data = JSON.parse(localStorage.getItem(storageKey) || '[]');
+  list.innerHTML='';
+  data.forEach((item,i)=>{
+    const li=document.createElement('li');
+    li.textContent=`${item.date}: ${item.text}`;
+    const del=document.createElement('button');
+    del.textContent='Delete';
+    del.onclick=()=>{data.splice(i,1);localStorage.setItem(storageKey,JSON.stringify(data));load();};
+    li.appendChild(del);list.appendChild(li);
+  });
+}
+function startTimer(){
+  let total=1500; //25*60
+  updateTimer(total);
+  const interval=setInterval(()=>{
+    total--; updateTimer(total);
+    if(total<=0){clearInterval(interval);alert('Break time!');}
+  },1000);
+}
+function updateTimer(sec){
+  const m=String(Math.floor(sec/60)).padStart(2,'0');
+  const s=String(sec%60).padStart(2,'0');
+  document.getElementById('timer').textContent=`${m}:${s}`;
+}
+function confetti(){
+  const end=Date.now()+1000;
+  const colors=['#bbff99','#ffb3ff','#ffeead'];
+  (function frame(){
+    const time=Date.now();
+    if(time>end) return; 
+    const div=document.createElement('div');
+    div.style.position='fixed';
+    div.style.left=Math.random()*100+'%';
+    div.style.top=Math.random()*100+'%';
+    div.style.background=colors[Math.floor(Math.random()*colors.length)];
+    div.style.width=div.style.height='8px';
+    div.style.borderRadius='50%';
+    div.style.pointerEvents='none';
+    div.style.opacity=1;
+    document.body.appendChild(div);
+    const fade=setInterval(()=>{div.style.opacity-=0.02; if(div.style.opacity<=0){clearInterval(fade);div.remove();}},16);
+    requestAnimationFrame(frame);
+  })();
+}
+dateInput.value=new Date().toISOString().slice(0,10); load();
 </script>
 </body>
 </html>
